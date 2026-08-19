@@ -249,21 +249,21 @@ bb77bb77b77bb77bbb77b77bbbb77b7b77b7777bbb77bb77b77bb77bbb77b77bbbb77b7b77b7777b
             case "image6":
             case "diver":return img`
 . . . . . . . . . . . . . . . . 
-. . . b b b b b b b b b . . . . 
-. . b 4 4 4 4 4 4 4 4 4 b . . . 
-. . b 4 4 4 4 4 4 4 4 4 b . . . 
-. . b 4 4 9 4 4 4 9 4 4 b . . . 
-. . b 4 4 9 4 4 4 9 4 4 b . . . 
-. . b 4 4 4 4 4 4 4 4 4 b . . . 
-. . b 4 4 4 4 4 4 4 4 4 b . . . 
-. . b 4 4 4 4 4 4 4 4 4 b . . . 
-. . b 4 4 4 4 4 4 4 4 4 b . . . 
-. . b 4 4 4 4 4 4 4 4 4 b . . . 
-. . b b b b b b b b b b b . . . 
-. . b b . . . . . . . b b . . . 
-. . b b . . . . . . . b b . . . 
-. . b b . . . . . . . b b . . . 
-. . b b . . . . . . . b b . . . 
+. . . 2 2 2 2 2 2 2 2 2 . . . . 
+. . 2 4 4 4 4 4 4 4 4 4 2 . . . 
+. . 2 4 4 4 4 4 4 4 4 4 2 . . . 
+. . 2 4 4 9 4 4 4 9 4 4 2 . . . 
+. . 2 4 4 9 4 4 4 9 4 4 2 . . . 
+. . 2 4 4 4 4 4 4 4 4 4 2 . . . 
+. . 2 4 4 4 4 4 4 4 4 4 2 . . . 
+. . 2 4 4 4 4 4 4 4 4 4 2 . . . 
+. . 2 4 4 4 4 4 4 4 4 4 2 . . . 
+. . 2 4 4 4 4 4 4 4 4 4 2 . . . 
+. . 2 2 2 2 2 2 2 2 2 2 2 . . . 
+. . 2 2 . . . . . . . 2 2 . . . 
+. . 2 2 . . . . . . . 2 2 . . . 
+. . 2 2 . . . . . . . 2 2 . . . 
+. . 2 2 . . . . . . . 2 2 . . . 
 `;
         }
         return null;
@@ -277,6 +277,13 @@ bb77bb77b77bb77bbb77b77bbbb77b7b77b7777bbb77bb77b77bb77bbb77b77bbbb77b7b77b7777b
     })
 
     helpers._registerFactory("song", function(name: string) {
+        switch(helpers.stringTrim(name)) {
+
+        }
+        return null;
+    })
+
+    helpers._registerFactory("json", function(name: string) {
         switch(helpers.stringTrim(name)) {
 
         }

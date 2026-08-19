@@ -1,4 +1,4 @@
-# so plan is a diving like quick time event? 
+# so plan is a diving like quick time event?
 # button combos appear on screen and you press them before hitting the ground
 # lets seeeeeeee
 Arrow = SpriteKind.create()
@@ -14,7 +14,8 @@ ticker.position_direction(CollisionDirection.RIGHT)
 ticker.max = 60
 ticker.value = ticker.max
 game.show_long_text("You are atop a very tall diving board...\n hit space to jump and press the arrows on screen to do tricks before you splash down! The more tricks the better!", DialogLayout.FULL)
-diver = sprites.create(assets.image("diver"))
+diver = sprites.create(assets.image("diver"), SpriteKind.player)
+div_rot = 0
 
 def on_start(): # game init stuff, innit?
     scene.set_background_image(assets.image("bg"))
@@ -28,8 +29,8 @@ on_start()
 def list_gen(): # generating the combo list used for diving
     if is_diving:
         for i in range(randint(1,4)):
-            if not combo: 
-                combo = b_list[randint(0, len(b_list)-1)] 
+            if not combo:
+                combo = b_list[randint(0, len(b_list)-1)]
             else:
                 combo = combo + (b_list[randint(0, len(b_list)-1)])
         console.log_value("combo", combo)
@@ -47,14 +48,14 @@ def list_gen(): # generating the combo list used for diving
 
 # silly function doing silly things
 def getinput(combo: str):
-    global combos_cleared
+    global combos_cleared, div_rot
     console.log_value("cur combo", combo)
     #cur_loop = -1 (old test to make sure I wasn't overloading the loop (i was))
     while len(combo) > 0:
         #cur_loop += 1
         #console.log(cur_loop)
         # check if button pressed == combo[0], if yes, delete arrows[0] and slice combo[1:]
-        # once len(combo) == 0, things are groovy 
+        # once len(combo) == 0, things are groovy
         # if anyone has a much neater way of doing this please lmk, I hate how this looks
         if controller.up.is_pressed() and combo[0] == "u":
             sprites.destroy(sprites.all_of_kind(Arrow)[0])
@@ -74,13 +75,14 @@ def getinput(combo: str):
             console.log_value("new combo", combo)
         pause(75) # small pause just to let the loop not destroy itself, while also preventing any double presses if the combo is "dd" for example
     console.log("job done :)")
+    div_rot +=1
     combos_cleared += 1 # need this for checking scores at the end
     console.log_value("combos cleared", combos_cleared)
     music.play(music.melody_playable(music.pew_pew), music.PlaybackMode.IN_BACKGROUND)
     list_gen() # we make a new combo set! this in theory loops forever back and forth...
 
 
-# actual game running time!! 
+# actual game running time!!
 
 def timeleft(): # started as just a timer... now basically handles the game loop haha
     global is_diving
@@ -88,11 +90,10 @@ def timeleft(): # started as just a timer... now basically handles the game loop
     if ticker.value == 0: # in THEORY, this stops you getting any last second combos!
         is_diving = False # stops the loop of combo gen
         sprites.destroy_all_sprites_of_kind(Arrow) # gets rid of all the arrows, can't perform acrobatics when in the water
-        scoring() # points? in MY video game?
+        #scoring() # points? in MY video game?
 
 
-
-def throttletick(): # stops it from being an instant thing 
+def throttletick(): # stops it from being an instant thing
     if is_diving:
         timer.throttle("second", 1000, timeleft)
 game.on_update(throttletick) # my only shame is that this just is forever running doing nothing until the time comes
@@ -104,12 +105,13 @@ def start_dive(): # game now starts on a button press! Yippee!
     if not is_diving:
         is_diving = True
         diver.x += 30
-        diver.ay = 2.34 # do math or make the tm bigger 
+        diver.ay = 2.34 # do math or make the tm bigger
     list_gen() # and so it begins
 controller.A.on_event(ControllerButtonEvent.PRESSED, start_dive)
 
+
+
 def scoring():
-    music.play(music.melody_playable(music.small_crash), music.PlaybackMode.IN_BACKGROUND)
     info.change_score_by(100*combos_cleared) # is this unfair to people who get a bunch of long combos? maybe...
     def final_tally():
         game.set_game_over_message(True, "GOOD DIVE!")
@@ -117,3 +119,18 @@ def scoring():
     timer.after(1000, final_tally)
 # SHOULD PROBABLY MAKE THE GAME PRETTY NOW RIGHT?
 
+def diverrotation(): # hehe, spinny
+    transformSprites.change_rotation(diver, div_rot)
+game.on_update(diverrotation)
+
+def splash():
+    global div_rot
+    div_rot = 0
+    scoring()
+    music.play(music.melody_playable(music.small_crash), music.PlaybackMode.IN_BACKGROUND)
+    extraEffects.create_effect_on_sprite(diver, extraEffects.create_single_color_spread_effect_data(9, ExtraEffectShapes.EXPLOSION), 100)
+    extraEffects.create_effect_on_sprite(diver, extraEffects.create_single_color_spread_effect_data(9, ExtraEffectShapes.EXPLOSION), 100)
+
+def throttle_splash(diver, bord):
+    timer.throttle("splash", 1500, splash)
+scene.on_overlap_tile(SpriteKind.player, assets.tile("border"), throttle_splash)

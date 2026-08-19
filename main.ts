@@ -1,4 +1,4 @@
-//  so plan is a diving like quick time event? 
+//  so plan is a diving like quick time event?
 //  button combos appear on screen and you press them before hitting the ground
 //  lets seeeeeeee
 let Arrow = SpriteKind.create()
@@ -17,7 +17,8 @@ ticker.max = 60
 ticker.value = ticker.max
 game.showLongText(`You are atop a very tall diving board...
  hit space to jump and press the arrows on screen to do tricks before you splash down! The more tricks the better!`, DialogLayout.Full)
-let diver = sprites.create(assets.image`diver`)
+let diver = sprites.create(assets.image`diver`, SpriteKind.Player)
+let div_rot = 0
 function on_start() {
     //  game init stuff, innit?
     scene.setBackgroundImage(assets.image`bg`)
@@ -74,7 +75,7 @@ function getinput(combo: string) {
         // cur_loop += 1
         // console.log(cur_loop)
         //  check if button pressed == combo[0], if yes, delete arrows[0] and slice combo[1:]
-        //  once len(combo) == 0, things are groovy 
+        //  once len(combo) == 0, things are groovy
         //  if anyone has a much neater way of doing this please lmk, I hate how this looks
         if (controller.up.isPressed() && combo[0] == "u") {
             sprites.destroy(sprites.allOfKind(Arrow)[0])
@@ -99,6 +100,7 @@ function getinput(combo: string) {
     }
     //  small pause just to let the loop not destroy itself, while also preventing any double presses if the combo is "dd" for example
     console.log("job done :)")
+    div_rot += 1
     combos_cleared += 1
     //  need this for checking scores at the end
     console.logValue("combos cleared", combos_cleared)
@@ -107,10 +109,11 @@ function getinput(combo: string) {
 }
 
 //  we make a new combo set! this in theory loops forever back and forth...
-//  actual game running time!! 
-//  points? in MY video game?
+//  actual game running time!!
+//  gets rid of all the arrows, can't perform acrobatics when in the water
+// scoring() # points? in MY video game?
 game.onUpdate(function throttletick() {
-    //  stops it from being an instant thing 
+    //  stops it from being an instant thing
     if (is_diving) {
         timer.throttle("second", 1000, function timeleft() {
             //  started as just a timer... now basically handles the game loop haha
@@ -121,8 +124,6 @@ game.onUpdate(function throttletick() {
                 is_diving = false
                 //  stops the loop of combo gen
                 sprites.destroyAllSpritesOfKind(Arrow)
-                //  gets rid of all the arrows, can't perform acrobatics when in the water
-                scoring()
             }
             
         })
@@ -141,11 +142,10 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function start_dive() {
         diver.ay = 2.34
     }
     
-    //  do math or make the tm bigger 
+    //  do math or make the tm bigger
     list_gen()
 })
 function scoring() {
-    music.play(music.melodyPlayable(music.smallCrash), music.PlaybackMode.InBackground)
     info.changeScoreBy(100 * combos_cleared)
     //  is this unfair to people who get a bunch of long combos? maybe...
     timer.after(1000, function final_tally() {
@@ -154,3 +154,18 @@ function scoring() {
     })
 }
 
+//  SHOULD PROBABLY MAKE THE GAME PRETTY NOW RIGHT?
+game.onUpdate(function diverrotation() {
+    //  hehe, spinny
+    transformSprites.changeRotation(diver, div_rot)
+})
+scene.onOverlapTile(SpriteKind.Player, assets.tile`border`, function throttle_splash(diver: Sprite, bord: tiles.Location) {
+    timer.throttle("splash", 1500, function splash() {
+        
+        div_rot = 0
+        scoring()
+        music.play(music.melodyPlayable(music.smallCrash), music.PlaybackMode.InBackground)
+        extraEffects.createEffectOnSprite(diver, extraEffects.createSingleColorSpreadEffectData(9, ExtraEffectShapes.Explosion), 100)
+        extraEffects.createEffectOnSprite(diver, extraEffects.createSingleColorSpreadEffectData(9, ExtraEffectShapes.Explosion), 100)
+    })
+})
